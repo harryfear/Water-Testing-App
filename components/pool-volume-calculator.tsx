@@ -105,7 +105,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-6 w-6" />
-          Calculate Hot Tub or Swimming Pool Volume
+          Calculate hot tub or swimming pool volume
         </CardTitle>
         <CardDescription>
           Enter your pool dimensions to calculate volume for accurate chemical dosing
@@ -211,7 +211,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
 
         <Button onClick={handleCalculate} className="w-full">
           <Calculator className="h-4 w-4 mr-2" />
-          Calculate Volume
+          Calculate hot tub or swimming pool volume
         </Button>
 
         {/* Results */}

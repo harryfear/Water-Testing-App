@@ -335,7 +335,7 @@ export function calculateChemicalAdjustments(
   recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
 
   // Determine retest time based on pool type
-  let timeToRetest = poolSpecs.type === "spa" ? "30 minutes" : "6-24 hours"
+  let timeToRetest = "For hot tubs retest in 30 mins, for swimming pools retest in 6-24 hours"
 
   return {
     recommendations,

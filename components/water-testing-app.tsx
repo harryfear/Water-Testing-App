@@ -208,7 +208,7 @@ export function WaterTestingApp() {
             </div>
             <div className="text-left">
               <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-700 to-cyan-700 bg-clip-text text-transparent">
-                Deep Blue Pro Strip Ease Pro
+                Deep Blue Strip Ease Pro
               </h1>
               <p className="text-sm sm:text-base text-blue-600 font-medium">AI-Powered Water Analysis</p>
             </div>
@@ -238,7 +238,7 @@ export function WaterTestingApp() {
                 </div>
                 <h3 className="font-bold mb-2 text-base sm:text-lg text-gray-900">Dip Test Strip</h3>
                 <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                  Dip your test strip in pool water for 2 seconds then remove
+                  Dip your test strip in water for 2 seconds then remove
                 </p>
               </div>
 

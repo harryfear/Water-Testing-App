@@ -1,6 +1,6 @@
 {
-  "name": "Deep Blue Pro Strip Ease Pro - Pool Water Testing",
-  "short_name": "Deep Blue Pro Strip Ease Pro",
+  "name": "Deep Blue Strip Ease Pro - Pool Water Testing",
+  "short_name": "Deep Blue Strip Ease Pro",
   "description": "Analyze your pool water test strips instantly with AI-powered color detection",
   "start_url": "/test-strip-results-analyser/",
   "display": "standalone",

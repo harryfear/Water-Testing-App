@@ -150,8 +150,14 @@ export function TestResults({ results }: TestResultsProps) {
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-gray-900 mb-1">
-                      {result.value}
-                      <span className="text-lg text-gray-600 ml-1">{result.unit}</span>
+                      {!isFinite(result.value) ? (
+                        <span className="text-red-600">Low quality image, please improve lighting</span>
+                      ) : (
+                        <>
+                          {result.value}
+                          <span className="text-lg text-gray-600 ml-1">{result.unit}</span>
+                        </>
+                      )}
                     </div>
                     <div className="text-sm text-gray-500">Current Value</div>
                   </div>

@@ -5,7 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Deep Blue Pro Strip Ease Pro - Pool Water Testing",
+  title: "Deep Blue Strip Ease Pro - Pool Water Testing",
   description: "Analyze your pool water test strips instantly with AI-powered color detection",
   icons: {
     icon: "/favicon.ico",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Deep Blue Pro Strip Ease Pro",
+    title: "Deep Blue Strip Ease Pro",
   },
   manifest: "./manifest.json",
 }
@@ -36,7 +36,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Deep Blue Pro Strip Ease Pro" />
+        <meta name="apple-mobile-web-app-title" content="Deep Blue Strip Ease Pro" />
         <link rel="apple-touch-icon" href="./icon-192x192.png" />
         <link rel="manifest" href="./manifest.json" />
         <link rel="icon" href="/favicon.ico" />

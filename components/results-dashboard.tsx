@@ -374,8 +374,14 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
                     <span className="hidden sm:inline">{config.name}</span>
                   </h4>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-xl sm:text-2xl font-bold">{result.value}</span>
-                    <span className="text-xs sm:text-sm text-gray-500">{result.unit}</span>
+                    {!isFinite(result.value) ? (
+                      <span className="text-xl sm:text-2xl font-bold text-red-600">Low quality image, please improve lighting</span>
+                    ) : (
+                      <>
+                        <span className="text-xl sm:text-2xl font-bold">{result.value}</span>
+                        <span className="text-xs sm:text-sm text-gray-500">{result.unit}</span>
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-1">
