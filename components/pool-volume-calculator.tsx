@@ -187,7 +187,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initia
         {/* Shape Selection */}
         <div className="space-y-3">
           <Label>Pool Shape</Label>
-          <Select value={shape} onValueChange={(value: PoolShape) => setShape(value)} modal={false}>
+          <Select value={shape} onValueChange={(value: PoolShape) => setShape(value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -203,7 +203,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initia
         {/* Length Unit Selection */}
         <div className="space-y-3">
           <Label>Input Dimensions Unit</Label>
-          <Select value={lengthUnit} onValueChange={(value: LengthUnit) => setLengthUnit(value)} modal={false}>
+          <Select value={lengthUnit} onValueChange={(value: LengthUnit) => setLengthUnit(value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -217,7 +217,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initia
         {/* Volume Unit Selection */}
         <div className="space-y-3">
           <Label>Output Volume Unit</Label>
-          <Select value={unit} onValueChange={(value: VolumeUnit) => setUnit(value)} modal={false}>
+          <Select value={unit} onValueChange={(value: VolumeUnit) => setUnit(value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
