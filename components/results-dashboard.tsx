@@ -340,7 +340,7 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
   return (
     <div className="space-y-4 sm:space-y-6">
       <Card className={`${getHealthScoreBackground(healthScore)}`}>
-        <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
+        <CardContent className="py-3 sm:py-4 px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="p-2 sm:p-3 bg-white rounded-full shadow-sm">

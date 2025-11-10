@@ -363,24 +363,28 @@ export function calculatePoolVolume(
   switch (shape) {
     case "rectangular":
       if (!dimensions.length || !dimensions.width) return 0
-      volumeCubicMeters = (dimensions.length * dimensions.width * avgDepth) / 35.315 // Convert cubic feet to cubic meters
+      // Dimensions are already in meters
+      volumeCubicMeters = dimensions.length * dimensions.width * avgDepth
       break
 
     case "circular":
       if (!dimensions.diameter) return 0
       const radius = dimensions.diameter / 2
-      volumeCubicMeters = (Math.PI * radius * radius * avgDepth) / 35.315
+      // Dimensions are already in meters
+      volumeCubicMeters = Math.PI * radius * radius * avgDepth
       break
 
     case "oval":
       if (!dimensions.length || !dimensions.width) return 0
-      volumeCubicMeters = (Math.PI * (dimensions.length / 2) * (dimensions.width / 2) * avgDepth) / 35.315
+      // Dimensions are already in meters
+      volumeCubicMeters = Math.PI * (dimensions.length / 2) * (dimensions.width / 2) * avgDepth
       break
 
     case "kidney":
       if (!dimensions.length || !dimensions.width) return 0
       // Approximate kidney shape as 0.85 of an oval
-      volumeCubicMeters = (Math.PI * (dimensions.length / 2) * (dimensions.width / 2) * avgDepth * 0.85) / 35.315
+      // Dimensions are already in meters
+      volumeCubicMeters = Math.PI * (dimensions.length / 2) * (dimensions.width / 2) * avgDepth * 0.85
       break
 
     default:

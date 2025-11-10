@@ -41,13 +41,26 @@ function getPriorityIcon(priority: string) {
   }
 }
 
+function formatVolumeUnit(unit: "gallons" | "litres" | "cubic-meters"): string {
+  switch (unit) {
+    case "gallons":
+      return "imperial gallons"
+    case "litres":
+      return "litres"
+    case "cubic-meters":
+      return "cubic meters"
+  }
+}
+
 export function ChemicalRecommendations({ results }: ChemicalRecommendationsProps) {
   const [poolVolume, setPoolVolume] = useState<number>(0)
+  const [volumeUnit, setVolumeUnit] = useState<"gallons" | "litres" | "cubic-meters">("gallons")
   const [showCalculator, setShowCalculator] = useState(false)
   const [calculations, setCalculations] = useState<ReturnType<typeof calculateChemicalAdjustments> | null>(null)
 
-  const handleVolumeCalculated = (volume: number) => {
+  const handleVolumeCalculated = (volume: number, unit: "gallons" | "litres" | "cubic-meters") => {
     setPoolVolume(volume)
+    setVolumeUnit(unit)
     if (volume > 0) {
       const poolSpecs: PoolSpecs = {
         volume,
@@ -78,6 +91,7 @@ export function ChemicalRecommendations({ results }: ChemicalRecommendationsProp
         <PoolVolumeCalculator
           onVolumeCalculated={handleVolumeCalculated}
           initialVolume={poolVolume > 0 ? poolVolume : undefined}
+          initialUnit={volumeUnit}
         />
       )}
 
@@ -105,7 +119,7 @@ export function ChemicalRecommendations({ results }: ChemicalRecommendationsProp
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
                   <div className="font-semibold">Pool Volume</div>
-                  <div className="text-sm text-gray-600">{poolVolume.toLocaleString()} gallons</div>
+                  <div className="text-sm text-gray-600">{Math.round(poolVolume).toLocaleString()} {formatVolumeUnit(volumeUnit)}</div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setShowCalculator(true)}>
                   Change Volume
