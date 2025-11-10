@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Calculator, Ruler, Droplets } from "lucide-react"
 import { calculatePoolVolume, convertVolume } from "@/lib/chemical-calculator"
+import { useAlertDialog } from "@/hooks/use-alert-dialog"
 
 interface PoolVolumeCalculatorProps {
   onVolumeCalculated: (volume: number) => void
@@ -29,13 +30,17 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
     deepDepth: "",
   })
   const [calculatedVolume, setCalculatedVolume] = useState<number | null>(initialVolume || null)
+  const { showAlert, AlertDialogComponent } = useAlertDialog()
 
   const handleCalculate = () => {
     const shallowDepth = parseFloat(dimensions.shallowDepth)
     const deepDepth = parseFloat(dimensions.deepDepth)
 
     if (isNaN(shallowDepth) || isNaN(deepDepth)) {
-      alert("Please enter both depth values")
+      showAlert({
+        title: "Missing Depth Values",
+        description: "Please enter both depth values",
+      })
       return
     }
 
@@ -46,7 +51,10 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
         const length = parseFloat(dimensions.length)
         const width = parseFloat(dimensions.width)
         if (isNaN(length) || isNaN(width)) {
-          alert("Please enter length and width for rectangular pool")
+          showAlert({
+            title: "Missing Dimensions",
+            description: "Please enter length and width for rectangular pool",
+          })
           return
         }
         volume = calculatePoolVolume(shape, { length, width, shallowDepth, deepDepth }, unit)
@@ -55,7 +63,10 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
       case "circular":
         const diameter = parseFloat(dimensions.diameter)
         if (isNaN(diameter)) {
-          alert("Please enter diameter for circular pool")
+          showAlert({
+            title: "Missing Dimension",
+            description: "Please enter diameter for circular pool",
+          })
           return
         }
         volume = calculatePoolVolume(shape, { diameter, shallowDepth, deepDepth }, unit)
@@ -65,7 +76,10 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
         const ovalLength = parseFloat(dimensions.length)
         const ovalWidth = parseFloat(dimensions.width)
         if (isNaN(ovalLength) || isNaN(ovalWidth)) {
-          alert("Please enter length and width for oval pool")
+          showAlert({
+            title: "Missing Dimensions",
+            description: "Please enter length and width for oval pool",
+          })
           return
         }
         volume = calculatePoolVolume(shape, { length: ovalLength, width: ovalWidth, shallowDepth, deepDepth }, unit)
@@ -75,7 +89,10 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
         const kidneyLength = parseFloat(dimensions.length)
         const kidneyWidth = parseFloat(dimensions.width)
         if (isNaN(kidneyLength) || isNaN(kidneyWidth)) {
-          alert("Please enter length and width for kidney-shaped pool")
+          showAlert({
+            title: "Missing Dimensions",
+            description: "Please enter length and width for kidney-shaped pool",
+          })
           return
         }
         volume = calculatePoolVolume(shape, { length: kidneyLength, width: kidneyWidth, shallowDepth, deepDepth }, unit)
@@ -241,6 +258,7 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume }: Pool
           </div>
         )}
       </CardContent>
+      {AlertDialogComponent}
     </Card>
   )
 }

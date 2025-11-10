@@ -23,6 +23,8 @@ import {
 import type { AnalysisResult } from "@/lib/color-analysis"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { useAlertDialog } from "@/hooks/use-alert-dialog"
 
 interface ResultsDashboardProps {
   results: Record<string, AnalysisResult>
@@ -170,6 +172,7 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
   const issueCount = Object.values(results).filter((r) => r.status !== "ok").length
   const totalParams = Object.keys(results).length
   const router = useRouter()
+  const { showAlert, AlertDialogComponent } = useAlertDialog()
 
   const handleSaveResults = async () => {
     try {
@@ -269,7 +272,11 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
       doc.save(`water-test-results-${now.toISOString().split("T")[0]}.pdf`)
     } catch (error) {
       console.error("Error generating PDF:", error)
-      alert("Failed to generate PDF. Please try again.")
+      showAlert({
+        title: "PDF Generation Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -300,11 +307,11 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
         }).catch(() => {
           // Fallback if Web Share fails
           navigator.clipboard.writeText(shareLink)
-          alert("Shareable link copied to clipboard!")
+          toast.success("Shareable link copied to clipboard!")
         })
       } else {
         navigator.clipboard.writeText(shareLink).then(() => {
-          alert("Shareable link copied to clipboard!")
+          toast.success("Shareable link copied to clipboard!")
         }).catch(() => {
           // Final fallback for older browsers
           const textArea = document.createElement('textarea')
@@ -313,12 +320,16 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
           textArea.select()
           document.execCommand('copy')
           document.body.removeChild(textArea)
-          alert("Shareable link copied to clipboard!")
+          toast.success("Shareable link copied to clipboard!")
         })
       }
     } catch (error) {
       console.error("Error creating share link:", error)
-      alert("Failed to create share link. Please try again.")
+      showAlert({
+        title: "Share Failed",
+        description: "Failed to create share link. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -530,6 +541,7 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
           </CardContent>
         </Card>
       )}
+      {AlertDialogComponent}
     </div>
   )
 }

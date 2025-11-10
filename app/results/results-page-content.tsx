@@ -6,6 +6,7 @@ import { ResultsDashboard } from "@/components/results-dashboard"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Home, AlertTriangle } from "lucide-react"
 import type { AnalysisResult } from "@/lib/color-analysis"
+import { useAlertDialog } from "@/hooks/use-alert-dialog"
 
 interface SharedResultsData {
   timestamp: string
@@ -21,6 +22,7 @@ export function ResultsPageContent() {
   const [results, setResults] = useState<Record<string, AnalysisResult> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { showAlert, AlertDialogComponent } = useAlertDialog()
 
   useEffect(() => {
     const shareId = searchParams.get("share")
@@ -65,7 +67,10 @@ export function ResultsPageContent() {
   const handleViewDetails = () => {
     // For shared results, we can't show detailed view in main app
     if (searchParams.get("share")) {
-      alert("Detailed view is not available for shared results.")
+      showAlert({
+        title: "Feature Not Available",
+        description: "Detailed view is not available for shared results.",
+      })
     } else {
       // For current results, navigate back to main app
       router.push("/")
@@ -161,6 +166,7 @@ export function ResultsPageContent() {
           )}
         </div>
       </div>
+      {AlertDialogComponent}
     </div>
   )
 }

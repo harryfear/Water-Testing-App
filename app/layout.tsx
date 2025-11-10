@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -49,7 +50,10 @@ html {
 }
         `}</style>
       </head>
-      <body className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">{children}</body>
+      <body className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }
