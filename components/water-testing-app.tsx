@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ImageUpload } from "@/components/image-upload"
 import { TestResults } from "@/components/test-results"
 import { ColorAnalysisDebug } from "@/components/color-analysis-debug"
 import { ResultsDashboard } from "@/components/results-dashboard"
 import { ManualColorOverride } from "@/components/manual-color-override"
-import { Droplets, Camera, Upload, ArrowLeft, Sparkles, CheckCircle, Settings, AlertTriangle } from "lucide-react"
+import { Droplets, Camera, Upload, ArrowLeft, Sparkles, CheckCircle, Settings } from "lucide-react"
 import { detectAndAnalyzeTestStrip } from "@/lib/color-analysis"
+import { detectStripType } from "@/lib/strip-type-detector"
 import type { AnalysisResult } from "@/lib/color-analysis"
+import { useAlertDialog } from "@/hooks/use-alert-dialog"
 
 export function WaterTestingApp() {
   const router = useRouter()
@@ -24,7 +25,7 @@ export function WaterTestingApp() {
   const [showDetailedResults, setShowDetailedResults] = useState(false)
   const [stripType, setStripType] = useState<"3-in-1" | "6-in-1">("6-in-1")
   const [showManualOverride, setShowManualOverride] = useState(false)
-  const [stripTypeMismatch, setStripTypeMismatch] = useState(false)
+  const { showAlert, AlertDialogComponent } = useAlertDialog()
 
   const handleImageUpload = async (imageUrl: string) => {
     setUploadedImage(imageUrl)
@@ -32,22 +33,69 @@ export function WaterTestingApp() {
     setAnalysisError(null)
     setShowDetailedResults(false)
     setShowManualOverride(false)
-    setStripTypeMismatch(false)
 
     try {
+      const stripDetection = await detectStripType(imageUrl)
+
       const analysisResults = await detectAndAnalyzeTestStrip(imageUrl, stripType)
       setResults(analysisResults)
-      
-      // Check for strip type mismatch
+
+      const detectionConfidenceThreshold = 0.5
       const detectedParams = Object.keys(analysisResults).length
-      if (stripType === "3-in-1" && detectedParams > 3) {
-        setStripTypeMismatch(true)
-      } else if (stripType === "6-in-1" && detectedParams < 4) {
-        setStripTypeMismatch(true)
+
+      let mismatchFlag = false
+      let mismatchReason: "detector" | "analysis" | null = null
+      let detectedType: "3-in-1" | "6-in-1" | null = stripDetection.inferredType
+
+      if (
+        stripDetection.inferredType &&
+        stripDetection.confidence >= detectionConfidenceThreshold &&
+        stripDetection.inferredType !== stripType
+      ) {
+        mismatchFlag = true
+        mismatchReason = "detector"
+      } else {
+        if (stripType === "3-in-1" && detectedParams > 3) {
+          mismatchFlag = true
+          mismatchReason = "analysis"
+          detectedType = "6-in-1"
+        } else if (stripType === "6-in-1" && detectedParams < 4) {
+          mismatchFlag = true
+          mismatchReason = "analysis"
+          detectedType = "3-in-1"
+        }
       }
-      
+
       // Save results to localStorage for the results page
       localStorage.setItem("currentAnalysisResults", JSON.stringify(analysisResults))
+
+      if (mismatchFlag) {
+        const fallbackDetectedType = detectedType ?? (stripType === "3-in-1" ? "6-in-1" : "3-in-1")
+        const detectionMatchesFallback =
+          stripDetection.inferredType === fallbackDetectedType && stripDetection.confidence > 0
+        const effectiveConfidence =
+          detectionMatchesFallback
+            ? stripDetection.confidence
+            : mismatchReason === "analysis"
+              ? 0.85
+              : stripDetection.confidence || 0
+        const cappedConfidence = Math.min(0.99, Math.max(0, effectiveConfidence))
+        const confidencePercent = Math.round(cappedConfidence * 100)
+        const detectedCount = fallbackDetectedType === "6-in-1" ? "6" : "3"
+        const selectedCount = stripType === "6-in-1" ? "6" : "3"
+        const codeConfidence = confidencePercent.toString().padStart(2, "0")
+        const mismatchMessageText = `You may have uploaded a ${fallbackDetectedType} test strip but opted to analyse a ${stripType} test strip. Are you sure you selected the correct type of test strip? (Code: MM-${detectedCount}-${selectedCount}-${codeConfidence})`
+
+        await showAlert({
+          title: "Mismatch Detected",
+          description: mismatchMessageText,
+          cancelLabel: "Back",
+          confirmLabel: "OK",
+          onCancel: () => {
+            resetTest()
+          },
+        })
+      }
     } catch (error) {
       console.error("Analysis failed:", error)
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
@@ -180,7 +228,6 @@ export function WaterTestingApp() {
     setAnalysisError(null)
     setShowDetailedResults(false)
     setShowManualOverride(false)
-    setStripTypeMismatch(false)
     // Clear localStorage when starting new test
     localStorage.removeItem("currentAnalysisResults")
   }
@@ -194,8 +241,10 @@ export function WaterTestingApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
-      <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 max-w-6xl">
+    <>
+      {AlertDialogComponent}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+        <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 max-w-6xl">
         <div className="text-center mb-8 sm:mb-12">
           <div className="flex items-center justify-center gap-3 mb-4 sm:mb-6">
             <div className="relative">
@@ -322,20 +371,6 @@ export function WaterTestingApp() {
           </Card>
         ) : (
           <div className="space-y-6 sm:space-y-8">
-            {/* Strip Type Mismatch Warning */}
-            {stripTypeMismatch && (
-              <Alert className="border-yellow-200 bg-yellow-50">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription>
-                  <strong>Strip Type Mismatch Detected:</strong>{" "}
-                  {stripType === "3-in-1" 
-                    ? "We have detected a 6-in-1 test strip. Please select the 6-in-1 test strip analyser for accurate results."
-                    : "We have detected a 3-in-1 test strip. Please select the 3-in-1 test strip analyser for accurate results."
-                  }
-                </AlertDescription>
-              </Alert>
-            )}
-
             <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
               <CardHeader className="pb-4 sm:pb-6 px-6 sm:px-8">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -399,7 +434,7 @@ export function WaterTestingApp() {
                   {isAnalyzing && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl backdrop-blur-sm">
                       <div className="text-white text-center p-6">
-                        <div className="relative mx-auto mb-4">
+                        <div className="relative mx-auto mb-4 w-12 h-12 sm:w-16 sm:h-16">
                           <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/30 rounded-full"></div>
                           <div className="absolute top-0 left-0 w-12 h-12 sm:w-16 sm:h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                         </div>
@@ -417,10 +452,11 @@ export function WaterTestingApp() {
             )}
 
             {results && !showDetailedResults && (
-              <ResultsDashboard 
-                results={results} 
+              <ResultsDashboard
+                results={results}
                 onViewDetails={handleViewDetails}
                 onViewResultsPage={handleViewResultsPage}
+                onNewAnalysis={resetTest}
               />
             )}
 
@@ -459,7 +495,8 @@ export function WaterTestingApp() {
             )}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -14,7 +15,10 @@ import {
 interface AlertDialogOptions {
   title?: string
   description: string
-  actionLabel?: string
+  confirmLabel?: string
+  cancelLabel?: string
+  onConfirm?: () => void | Promise<void>
+  onCancel?: () => void | Promise<void>
   variant?: "default" | "destructive"
 }
 
@@ -23,51 +27,67 @@ export function useAlertDialog() {
   const [options, setOptions] = useState<AlertDialogOptions>({
     description: "",
   })
+  const resolveRef = useRef<(() => void) | null>(null)
 
-  const showAlert = useCallback(
-    (opts: AlertDialogOptions): Promise<void> => {
-      return new Promise((resolve) => {
-        setOptions(opts)
-        setIsOpen(true)
+  const closeDialog = useCallback(() => {
+    const resolver = resolveRef.current
+    resolveRef.current = null
+    setIsOpen(false)
+    resolver?.()
+  }, [])
 
-        // Store resolve function to call when dialog closes
-        const handleClose = () => {
-          setIsOpen(false)
-          resolve()
-        }
+  const handleConfirm = useCallback(async () => {
+    try {
+      await options.onConfirm?.()
+    } finally {
+      closeDialog()
+    }
+  }, [options.onConfirm, closeDialog])
 
-        // Attach close handler to window temporarily
-        ;(window as any).__alertDialogResolve = handleClose
-      })
+  const handleCancel = useCallback(async () => {
+    try {
+      await options.onCancel?.()
+    } finally {
+      closeDialog()
+    }
+  }, [options.onCancel, closeDialog])
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open)
+      if (!open && resolveRef.current) {
+        const resolver = resolveRef.current
+        resolveRef.current = null
+        resolver()
+      }
     },
     []
   )
 
-  const handleAction = () => {
-    if ((window as any).__alertDialogResolve) {
-      ;(window as any).__alertDialogResolve()
-      delete (window as any).__alertDialogResolve
-    }
-    setIsOpen(false)
-  }
+  const showAlert = useCallback((opts: AlertDialogOptions): Promise<void> => {
+    return new Promise((resolve) => {
+      resolveRef.current = resolve
+      setOptions(opts)
+      setIsOpen(true)
+    })
+  }, [])
 
   const AlertDialogComponent = (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+    <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           {options.title && <AlertDialogTitle>{options.title}</AlertDialogTitle>}
           <AlertDialogDescription>{options.description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
+          {options.cancelLabel && (
+            <AlertDialogCancel onClick={handleCancel}>{options.cancelLabel}</AlertDialogCancel>
+          )}
           <AlertDialogAction
-            onClick={handleAction}
-            className={
-              options.variant === "destructive"
-                ? "bg-red-600 hover:bg-red-700"
-                : ""
-            }
+            onClick={handleConfirm}
+            className={options.variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""}
           >
-            {options.actionLabel || "OK"}
+            {options.confirmLabel || "OK"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

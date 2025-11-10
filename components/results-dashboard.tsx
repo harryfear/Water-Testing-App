@@ -30,6 +30,7 @@ interface ResultsDashboardProps {
   results: Record<string, AnalysisResult>
   onViewDetails: () => void
   onViewResultsPage?: () => void
+  onNewAnalysis?: () => void
   isShared?: boolean
 }
 
@@ -167,7 +168,13 @@ function ConfidenceTooltip({ confidence }: { confidence: number }) {
   )
 }
 
-export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, isShared = false }: ResultsDashboardProps) {
+export function ResultsDashboard({
+  results,
+  onViewDetails,
+  onViewResultsPage,
+  onNewAnalysis,
+  isShared = false,
+}: ResultsDashboardProps) {
   const healthScore = calculateHealthScore(results)
   const issueCount = Object.values(results).filter((r) => r.status !== "ok").length
   const totalParams = Object.keys(results).length
@@ -334,13 +341,17 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
   }
 
   const handleNewAnalysis = () => {
-    router.push("/")
+    if (onNewAnalysis) {
+      onNewAnalysis()
+      return
+    }
+    router.push("/test-strip-results-analyser")
   }
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <Card className={`${getHealthScoreBackground(healthScore)}`}>
-        <CardContent className="py-3 sm:py-4 px-4 sm:px-6">
+        <CardContent className="py-0 sm:py-0 px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="p-2 sm:p-3 bg-white rounded-full shadow-sm">
@@ -510,7 +521,7 @@ export function ResultsDashboard({ results, onViewDetails, onViewResultsPage, is
 
       {issueCount > 0 && (
         <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
+          <CardContent className="py-0 sm:py-0 px-4 sm:px-6">
             <div className="flex items-start gap-2 sm:gap-3">
               <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
