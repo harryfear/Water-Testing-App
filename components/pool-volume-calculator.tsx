@@ -11,21 +11,36 @@ import { Calculator, Ruler } from "lucide-react"
 import { calculatePoolVolume } from "@/lib/chemical-calculator"
 import { useAlertDialog } from "@/hooks/use-alert-dialog"
 
-interface PoolVolumeCalculatorProps {
-  onVolumeCalculated: (volume: number, unit: VolumeUnit) => void
-  initialVolume?: number
-  initialUnit?: VolumeUnit
+export type PoolShape = "rectangular" | "circular" | "oval" | "kidney"
+export type VolumeUnit = "gallons" | "litres" | "cubic-meters"
+export type LengthUnit = "feet" | "meters"
+
+export interface PoolDimensions {
+  length: string
+  width: string
+  diameter: string
+  shallowDepth: string
+  deepDepth: string
 }
 
-type PoolShape = "rectangular" | "circular" | "oval" | "kidney"
-type VolumeUnit = "gallons" | "litres" | "cubic-meters"
-type LengthUnit = "feet" | "meters"
+export interface PoolCalculatorState {
+  shape: PoolShape
+  lengthUnit: LengthUnit
+  dimensions: PoolDimensions
+}
 
-export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initialUnit }: PoolVolumeCalculatorProps) {
-  const [shape, setShape] = useState<PoolShape>("rectangular")
+interface PoolVolumeCalculatorProps {
+  onVolumeCalculated: (volume: number, unit: VolumeUnit, state: PoolCalculatorState) => void
+  initialVolume?: number
+  initialUnit?: VolumeUnit
+  initialState?: PoolCalculatorState
+}
+
+export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initialUnit, initialState }: PoolVolumeCalculatorProps) {
+  const [shape, setShape] = useState<PoolShape>(initialState?.shape || "rectangular")
   const [unit, setUnit] = useState<VolumeUnit>(initialUnit || "gallons")
-  const [lengthUnit, setLengthUnit] = useState<LengthUnit>("meters")
-  const [dimensions, setDimensions] = useState({
+  const [lengthUnit, setLengthUnit] = useState<LengthUnit>(initialState?.lengthUnit || "meters")
+  const [dimensions, setDimensions] = useState<PoolDimensions>(initialState?.dimensions || {
     length: "",
     width: "",
     diameter: "",
@@ -148,7 +163,12 @@ export function PoolVolumeCalculator({ onVolumeCalculated, initialVolume, initia
 
     if (volume > 0) {
       setCalculatedVolume(volume)
-      onVolumeCalculated(volume, unit) // Pass volume in the selected unit along with the unit
+      const currentState: PoolCalculatorState = {
+        shape,
+        lengthUnit,
+        dimensions
+      }
+      onVolumeCalculated(volume, unit, currentState) // Pass volume, unit, and current state
     }
   }
 

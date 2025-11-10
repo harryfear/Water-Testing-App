@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Calculator, AlertTriangle, Clock, ShoppingCart } from "lucide-react"
-import { PoolVolumeCalculator } from "./pool-volume-calculator"
+import { PoolVolumeCalculator, type PoolCalculatorState, type VolumeUnit } from "./pool-volume-calculator"
 import { calculateChemicalAdjustments, type PoolSpecs } from "@/lib/chemical-calculator"
 import type { AnalysisResult } from "@/lib/color-analysis"
 
@@ -41,7 +41,7 @@ function getPriorityIcon(priority: string) {
   }
 }
 
-function formatVolumeUnit(unit: "gallons" | "litres" | "cubic-meters"): string {
+function formatVolumeUnit(unit: VolumeUnit): string {
   switch (unit) {
     case "gallons":
       return "imperial gallons"
@@ -54,13 +54,15 @@ function formatVolumeUnit(unit: "gallons" | "litres" | "cubic-meters"): string {
 
 export function ChemicalRecommendations({ results }: ChemicalRecommendationsProps) {
   const [poolVolume, setPoolVolume] = useState<number>(0)
-  const [volumeUnit, setVolumeUnit] = useState<"gallons" | "litres" | "cubic-meters">("gallons")
+  const [volumeUnit, setVolumeUnit] = useState<VolumeUnit>("gallons")
+  const [calculatorState, setCalculatorState] = useState<PoolCalculatorState | undefined>(undefined)
   const [showCalculator, setShowCalculator] = useState(false)
   const [calculations, setCalculations] = useState<ReturnType<typeof calculateChemicalAdjustments> | null>(null)
 
-  const handleVolumeCalculated = (volume: number, unit: "gallons" | "litres" | "cubic-meters") => {
+  const handleVolumeCalculated = (volume: number, unit: VolumeUnit, state: PoolCalculatorState) => {
     setPoolVolume(volume)
     setVolumeUnit(unit)
+    setCalculatorState(state)
     if (volume > 0) {
       const poolSpecs: PoolSpecs = {
         volume,
@@ -92,6 +94,7 @@ export function ChemicalRecommendations({ results }: ChemicalRecommendationsProp
           onVolumeCalculated={handleVolumeCalculated}
           initialVolume={poolVolume > 0 ? poolVolume : undefined}
           initialUnit={volumeUnit}
+          initialState={calculatorState}
         />
       )}
 
